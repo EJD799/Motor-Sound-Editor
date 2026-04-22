@@ -989,7 +989,7 @@ async function browseAudioFile() {
 
   
   const objectUrl = URL.createObjectURL(
-    new Blob([bytes as any], { // 使用 as any 跳过严格的 ArrayBufferLike 检查
+    new Blob([bytes.buffer as ArrayBuffer], { // 明确告诉 TS 这是一个普通的 ArrayBuffer
       type: extension === "wav" ? "audio/wav" : "audio/ogg",
     }),
   );
