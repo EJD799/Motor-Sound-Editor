@@ -957,7 +957,7 @@ async function closeWindow() {
   outline: none;
 }
 
-.project-dialog .styled-number {
+.project-dialog :deep(.styled-number) {
   width: 100%;
   height: 40px;
 }

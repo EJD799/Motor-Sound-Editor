@@ -1683,6 +1683,7 @@ onBeforeUnmount(() => {
         <span>Current Speed</span>
         <label>
           <StyledNumberInput
+            class="speed-readout-input"
             v-model="speedDraft"
             min="0"
             :max="editorStore.simulator.maxSpeed"
@@ -2477,13 +2478,17 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
-.speed-readout .styled-number {
+.speed-readout-input {
   flex: 0 0 72px;
   min-width: 0;
-  height: 34px;
-  font-size: 20px;
+  height: 32px;
+  font-size: 14px;
   font-weight: 760;
   text-align: right;
+}
+
+.speed-readout-input :deep(input) {
+  padding: 0 4px;
 }
 
 .speed-readout small {
@@ -2665,7 +2670,7 @@ onBeforeUnmount(() => {
   padding: 0 10px;
 }
 
-.track-details .styled-number {
+.track-details :deep(.styled-number) {
   width: 100%;
   height: 30px;
 }
@@ -2793,7 +2798,7 @@ onBeforeUnmount(() => {
   padding: 0 10px;
 }
 
-.transport-field .styled-number {
+.transport-field :deep(.styled-number) {
   width: 82px;
   height: 30px;
 }
@@ -3002,7 +3007,7 @@ onBeforeUnmount(() => {
   border-color: rgba(139, 195, 224, 0.62);
 }
 
-.list-editor-table .styled-number {
+.list-editor-table :deep(.styled-number) {
   width: 100%;
   height: 30px;
 }
@@ -3065,7 +3070,7 @@ onBeforeUnmount(() => {
   outline: none;
 }
 
-.add-keyframe-panel .styled-number {
+.add-keyframe-panel :deep(.styled-number) {
   width: 100%;
   height: 34px;
 }
@@ -3123,9 +3128,9 @@ onBeforeUnmount(() => {
     width: 56px;
   }
 
-  .speed-readout .styled-number {
+  .speed-readout-input {
     flex-basis: 52px;
-    font-size: 15px;
+    font-size: 10px;
     text-align: center;
   }
 
