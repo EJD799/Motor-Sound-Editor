@@ -2,6 +2,10 @@ import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 import { clamp } from "@/utils/math";
 import { CURVE_MAX_VALUE } from "@/constants/curveRanges";
+import {
+  revokeAssetObjectUrl,
+  revokeDocumentObjectUrls,
+} from "@/services/bmsProject";
 
 import type { ID } from "@/types/common";
 import type { CreateProjectPayload, ProjectDocument } from "@/types/project";
@@ -50,6 +54,14 @@ function normalizeTrackCurves(track: Track, maxSpeed: number) {
       );
     });
   });
+}
+
+function normalizeProjectDocument(document: ProjectDocument): ProjectDocument {
+  document.tracks.tracks.forEach((track) => {
+    normalizeTrackCurves(track, document.project.meta.maxSpeed);
+  });
+
+  return document;
 }
 
 function channelToHex(value: number): string {
@@ -110,18 +122,19 @@ export const useProjectStore = defineStore("project", () => {
   const meta = computed(() => document.value?.project.meta ?? null);
   const tracks = computed(() => document.value?.tracks.tracks ?? []);
   const assets = computed(() => document.value?.tracks.assets ?? []);
+  const trackById = computed(
+    () => new Map(tracks.value.map((track) => [track.id, track])),
+  );
+  const assetById = computed(
+    () => new Map(assets.value.map((asset) => [asset.id, asset])),
+  );
   const activeTrackId = computed(
     () => document.value?.tracks.activeTrackId ?? null,
   );
 
   const activeTrack = computed(() => {
-    if (!document.value) return null;
-
-    return (
-      document.value.tracks.tracks.find(
-        (track) => track.id === document.value?.tracks.activeTrackId,
-      ) ?? null
-    );
+    const activeId = activeTrackId.value;
+    return activeId ? trackById.value.get(activeId) ?? null : null;
   });
 
   function markDirty() {
@@ -132,20 +145,23 @@ export const useProjectStore = defineStore("project", () => {
   }
 
   function clearProject() {
+    revokeDocumentObjectUrls(document.value);
     document.value = null;
     currentFilePath.value = null;
     dirty.value = false;
   }
 
   function loadProject(next: ProjectDocument, filePath?: string) {
-    document.value = next;
+    revokeDocumentObjectUrls(document.value);
+    document.value = normalizeProjectDocument(next);
     currentFilePath.value = filePath ?? null;
     dirty.value = false;
   }
 
   function createNewProject(payload: CreateProjectPayload) {
+    revokeDocumentObjectUrls(document.value);
     const next = createProjectDocument(payload);
-    document.value = next;
+    document.value = normalizeProjectDocument(next);
     currentFilePath.value = null;
     dirty.value = false;
   }
@@ -339,7 +355,14 @@ export const useProjectStore = defineStore("project", () => {
     if (!document.value) return;
 
     document.value.tracks.assets = document.value.tracks.assets.filter(
-      (asset) => asset.id !== assetId,
+      (asset) => {
+        if (asset.id === assetId) {
+          revokeAssetObjectUrl(asset);
+          return false;
+        }
+
+        return true;
+      },
     );
 
     document.value.tracks.tracks.forEach((track) => {
@@ -433,6 +456,10 @@ export const useProjectStore = defineStore("project", () => {
       keyframe.value = normalizeKeyframeValue(kind, patch.value);
     }
 
+    if (typeof patch.speed === "number") {
+      curve.keyframes = sortKeyframesBySpeed(curve.keyframes);
+    }
+
     markDirty();
   }
 
@@ -457,7 +484,8 @@ export const useProjectStore = defineStore("project", () => {
   }
 
   function replaceDocument(next: ProjectDocument) {
-    document.value = next;
+    revokeDocumentObjectUrls(document.value);
+    document.value = normalizeProjectDocument(next);
     dirty.value = true;
   }
 
@@ -470,6 +498,8 @@ export const useProjectStore = defineStore("project", () => {
     meta,
     tracks,
     assets,
+    trackById,
+    assetById,
     activeTrackId,
     activeTrack,
 

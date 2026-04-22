@@ -6,6 +6,7 @@ import EditorPage from "@/pages/EditorPage.vue";
 import {
   ensureBmsExtension,
   readFileModifiedAt,
+  restoreDocumentObjectUrls,
   saveBmsProject,
 } from "@/services/bmsProject";
 import { useAssetPayloadStore } from "@/stores/assetPayloads";
@@ -104,7 +105,9 @@ function applyUndo() {
     return;
   }
 
-  projectStore.replaceDocument(snapshot.document);
+  projectStore.replaceDocument(
+    restoreDocumentObjectUrls(snapshot.document, assetPayloadStore.payloads),
+  );
   editorStore.replaceRuntime(snapshot.editor);
   notificationStore.showToast("Undo applied");
 }
@@ -119,7 +122,9 @@ function applyRedo() {
     return;
   }
 
-  projectStore.replaceDocument(snapshot.document);
+  projectStore.replaceDocument(
+    restoreDocumentObjectUrls(snapshot.document, assetPayloadStore.payloads),
+  );
   editorStore.replaceRuntime(snapshot.editor);
   notificationStore.showToast("Redo applied");
 }

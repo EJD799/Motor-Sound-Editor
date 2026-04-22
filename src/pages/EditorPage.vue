@@ -11,13 +11,14 @@ import {
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { fileNameFromPath } from "@/services/bmsProject";
+import { createObjectUrl, fileNameFromPath } from "@/services/bmsProject";
 import { useAssetPayloadStore } from "@/stores/assetPayloads";
 import { useEditorStore } from "@/stores/editor";
 import { useHistoryStore } from "@/stores/history";
 import { useProjectStore } from "@/stores/project";
 import { AudioPreviewEngine } from "@/services/audioPreview";
 import { CURVE_MAX_VALUE } from "@/constants/curveRanges";
+import { sampleCurve } from "@/utils/curves";
 import { APP_VERSION } from "@/types/project";
 import type {
   CurveKind,
@@ -47,7 +48,10 @@ interface ChartConfig {
 
 interface ChartRuntime {
   stage: Konva.Stage;
-  layer: Konva.Layer;
+  backgroundLayer: Konva.Layer;
+  curveLayer: Konva.Layer;
+  interactionLayer: Konva.Layer;
+  playhead: Konva.Line | null;
   config: ChartConfig;
 }
 
@@ -93,7 +97,7 @@ const selectedKeyframe = computed(() => editorStore.selection.selectedKeyframe);
 const activeCurveSet = computed<CurveSetKind>(() => editorStore.activeCurveSet);
 const selectedPoint = computed(() => {
   const selected = selectedKeyframe.value;
-  const track = tracks.value.find((item) => item.id === selected?.trackId);
+  const track = selected ? projectStore.trackById.get(selected.trackId) : null;
 
   if (!selected || !track) return null;
 
@@ -108,10 +112,7 @@ const activeAssetName = computed(() => {
   const track = activeTrack.value;
   if (!track?.assetId) return "No file";
 
-  return (
-    assets.value.find((asset) => asset.id === track.assetId)?.fileName ??
-    "No file"
-  );
+  return projectStore.assetById.get(track.assetId)?.fileName ?? "No file";
 });
 
 const modeLabel = computed(() => {
@@ -137,27 +138,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function sortedKeyframes(curve: TrackCurve): Keyframe[] {
-  return [...curve.keyframes].sort((a, b) => a.speed - b.speed);
-}
-
-function sampleCurve(curve: TrackCurve, speed: number): number {
-  const keyframes = sortedKeyframes(curve);
-
-  if (keyframes.length === 0) return curve.kind === "pitch" ? 1 : 0;
-  if (speed <= keyframes[0].speed) return keyframes[0].value;
-
-  for (let index = 1; index < keyframes.length; index += 1) {
-    const previous = keyframes[index - 1];
-    const next = keyframes[index];
-
-    if (speed <= next.speed) {
-      const span = next.speed - previous.speed;
-      const ratio = span === 0 ? 0 : (speed - previous.speed) / span;
-      return previous.value + (next.value - previous.value) * ratio;
-    }
-  }
-
-  return keyframes[keyframes.length - 1].value;
+  return curve.keyframes;
 }
 
 function syncAudioPreview() {
@@ -252,10 +233,21 @@ function createStage(container: HTMLDivElement, config: ChartConfig) {
     width: Math.max(420, container.clientWidth),
     height: Math.max(220, container.clientHeight),
   });
-  const layer = new Konva.Layer();
-  stage.add(layer);
+  const backgroundLayer = new Konva.Layer({ listening: false });
+  const curveLayer = new Konva.Layer();
+  const interactionLayer = new Konva.Layer({ listening: false });
+  stage.add(backgroundLayer);
+  stage.add(curveLayer);
+  stage.add(interactionLayer);
 
-  const runtime = { stage, layer, config };
+  const runtime = {
+    stage,
+    backgroundLayer,
+    curveLayer,
+    interactionLayer,
+    playhead: null,
+    config,
+  };
   charts.set(config.kind, runtime);
 
   stage.on("click tap", () => handleChartClick(runtime));
@@ -375,7 +367,7 @@ function handleChartClick(runtime: ChartRuntime) {
         }
       }
 
-      renderCharts();
+      renderCurveCharts();
       return;
     }
 
@@ -387,7 +379,7 @@ function handleChartClick(runtime: ChartRuntime) {
     );
     editorStore.setCurrentSpeed(point.speed);
     syncAudioPreview();
-    renderCharts();
+    renderPlayheads();
     return;
   }
 
@@ -400,7 +392,7 @@ function handleChartClick(runtime: ChartRuntime) {
       kind: runtime.config.kind,
       keyframeId,
     });
-    renderCharts();
+    renderCurveCharts();
     return;
   }
 
@@ -434,7 +426,7 @@ function handleChartClick(runtime: ChartRuntime) {
   }
 
   syncAudioPreview();
-  renderCharts();
+  renderCurveCharts();
 }
 
 function handleChartContextMenu(runtime: ChartRuntime, target: Konva.Node) {
@@ -458,7 +450,7 @@ function handleChartContextMenu(runtime: ChartRuntime, target: Konva.Node) {
     editorStore.clearSelection();
     pushHistory("Delete keyframe");
     syncAudioPreview();
-    renderCharts();
+    renderCurveCharts();
     return;
   }
 
@@ -466,18 +458,37 @@ function handleChartContextMenu(runtime: ChartRuntime, target: Konva.Node) {
 }
 
 function renderCharts() {
+  renderAllCharts();
+}
+
+function renderAllCharts() {
   charts.forEach((runtime) => renderChart(runtime));
 }
 
+function renderCurveCharts() {
+  charts.forEach((runtime) => {
+    renderCurveChart(runtime);
+    renderPlayhead(runtime);
+  });
+}
+
+function renderPlayheads() {
+  charts.forEach((runtime) => renderPlayhead(runtime));
+}
+
 function renderChart(runtime: ChartRuntime) {
-  const { stage, layer, config } = runtime;
+  renderBackgroundChart(runtime);
+  renderCurveChart(runtime);
+  renderPlayhead(runtime);
+}
+
+function renderBackgroundChart(runtime: ChartRuntime) {
+  const { stage, backgroundLayer, config } = runtime;
   const bounds = chartBounds(stage);
   const maxSpeed = editorStore.simulator.maxSpeed || 1;
-  const hasActiveTrack = activeTrackId.value !== null;
 
-  layer.destroyChildren();
-  setStageCursor(runtime);
-  layer.add(
+  backgroundLayer.destroyChildren();
+  backgroundLayer.add(
     new Konva.Rect({
       x: 0,
       y: 0,
@@ -491,14 +502,14 @@ function renderChart(runtime: ChartRuntime) {
   for (let index = 0; index <= 12; index += 1) {
     const x = bounds.left + ((bounds.right - bounds.left) / 12) * index;
     const speed = (maxSpeed / 12) * index;
-    layer.add(
+    backgroundLayer.add(
       new Konva.Line({
         points: [x, bounds.top, x, bounds.bottom],
         stroke: "rgba(189, 208, 219, 0.42)",
         strokeWidth: 1,
       }),
     );
-    layer.add(
+    backgroundLayer.add(
       new Konva.Text({
         x: x - 18,
         y: bounds.bottom + 8,
@@ -514,14 +525,14 @@ function renderChart(runtime: ChartRuntime) {
   for (let index = 0; index <= 5; index += 1) {
     const y = bounds.bottom - ((bounds.bottom - bounds.top) / 5) * index;
     const value = (config.maxValue / 5) * index;
-    layer.add(
+    backgroundLayer.add(
       new Konva.Line({
         points: [bounds.left, y, bounds.right, y],
         stroke: "rgba(189, 208, 219, 0.42)",
         strokeWidth: 1,
       }),
     );
-    layer.add(
+    backgroundLayer.add(
       new Konva.Text({
         x: 10,
         y: y - 8,
@@ -534,7 +545,7 @@ function renderChart(runtime: ChartRuntime) {
     );
   }
 
-  layer.add(
+  backgroundLayer.add(
     new Konva.Text({
       x: (bounds.left + bounds.right) / 2 - 58,
       y: stage.height() - 22,
@@ -545,7 +556,7 @@ function renderChart(runtime: ChartRuntime) {
       fill: "#F3F7FA",
     }),
   );
-  layer.add(
+  backgroundLayer.add(
     new Konva.Text({
       x: 4,
       y: (bounds.top + bounds.bottom) / 2 + 42,
@@ -555,6 +566,17 @@ function renderChart(runtime: ChartRuntime) {
       rotation: -90,
     }),
   );
+
+  backgroundLayer.draw();
+}
+
+function renderCurveChart(runtime: ChartRuntime) {
+  const { stage, curveLayer, config } = runtime;
+  const bounds = chartBounds(stage);
+  const hasActiveTrack = activeTrackId.value !== null;
+
+  curveLayer.destroyChildren();
+  setStageCursor(runtime);
 
   tracks.value.filter(isVisibleTrack).forEach((track) => {
     const curve = track.curveSets[activeCurveSet.value][config.kind];
@@ -582,7 +604,7 @@ function renderChart(runtime: ChartRuntime) {
         curveKind: config.kind,
       });
 
-      layer.add(line);
+      curveLayer.add(line);
     }
 
     keyframes.forEach((keyframe) => {
@@ -685,7 +707,7 @@ function renderChart(runtime: ChartRuntime) {
           { speed: movedPoint.speed, value: movedPoint.value },
         );
 
-        const currentTrack = tracks.value.find((item) => item.id === track.id);
+        const currentTrack = projectStore.trackById.get(track.id);
         const currentCurve =
           currentTrack?.curveSets[activeCurveSet.value]?.[config.kind];
         if (line && currentCurve) {
@@ -693,11 +715,11 @@ function renderChart(runtime: ChartRuntime) {
         }
 
         syncAudioPreview();
-        layer.batchDraw();
+        curveLayer.batchDraw();
       });
       circle.on("dragend", () => {
         try {
-          const currentTrack = tracks.value.find((item) => item.id === track.id);
+          const currentTrack = projectStore.trackById.get(track.id);
           const currentCurve =
             currentTrack?.curveSets[activeCurveSet.value]?.[config.kind];
           const currentKeyframe = currentCurve?.keyframes.find(
@@ -743,30 +765,41 @@ function renderChart(runtime: ChartRuntime) {
           }, 0);
           syncAudioPreview();
           setStageCursor(runtime);
-          renderCharts();
+          renderCurveCharts();
         }
       });
 
-      layer.add(circle);
+      curveLayer.add(circle);
     });
   });
 
+  curveLayer.draw();
+}
+
+function renderPlayhead(runtime: ChartRuntime) {
+  const { stage, config, interactionLayer } = runtime;
+  const bounds = chartBounds(stage);
   const playhead = pointToCanvas(
     stage,
     config,
     editorStore.simulator.currentSpeed,
     0,
   );
-  layer.add(
-    new Konva.Line({
+
+  if (!runtime.playhead) {
+    runtime.playhead = new Konva.Line({
       points: [playhead.x, bounds.top, playhead.x, bounds.bottom],
       stroke: "#F25B5B",
       strokeWidth: 2,
       dash: [6, 5],
-    }),
-  );
+      listening: false,
+    });
+    interactionLayer.add(runtime.playhead);
+  } else {
+    runtime.playhead.points([playhead.x, bounds.top, playhead.x, bounds.bottom]);
+  }
 
-  layer.draw();
+  interactionLayer.batchDraw();
 }
 
 async function playTransport() {
@@ -829,7 +862,7 @@ function tick(timestamp: number) {
   editorStore.setCurrentSpeed(nextSpeed);
   syncAudioPreview();
   if (!isDraggingKeyframe) {
-    renderCharts();
+    renderPlayheads();
   }
 
   if (hitLimit) {
@@ -842,7 +875,7 @@ function tick(timestamp: number) {
 
 function setMode(mode: "traction" | "coasting" | "brake") {
   editorStore.setSimulatorMode(mode);
-  renderCharts();
+  renderCurveCharts();
   syncAudioPreview();
 }
 
@@ -854,14 +887,14 @@ function setTool(tool: "select" | "move" | "keyframe") {
 
   stopCurrentKeyframeDrag();
   editorStore.setTool(tool);
-  renderCharts();
+  renderCurveCharts();
 }
 
 function commitSpeed() {
   editorStore.setCurrentSpeed(Number(speedDraft.value));
   speedDraft.value = editorStore.simulator.currentSpeed.toFixed(1);
   syncAudioPreview();
-  renderCharts();
+  renderPlayheads();
 }
 
 function updateMaxSpeed(event: Event) {
@@ -891,7 +924,7 @@ function activateTrack(trackId: string | null) {
   }
 
   syncAudioPreview();
-  renderCharts();
+  renderCurveCharts();
 }
 
 function toggleTrackActivation(trackId: string) {
@@ -916,7 +949,7 @@ function deleteActiveTrack() {
   editorStore.setTool("select");
   pushHistory("Delete track");
   syncAudioPreview();
-  renderCharts();
+  renderCurveCharts();
 }
 
 function updateTrackName(event: Event) {
@@ -935,11 +968,11 @@ function updateTrackColor(event: Event) {
   const input = event.target as HTMLInputElement;
   projectStore.updateTrack(track.id, { color: input.value });
   pushHistory("Update track color");
-  renderCharts();
+  renderCurveCharts();
 }
 
 function toggleTrackMute(trackId: string) {
-  const track = tracks.value.find((item) => item.id === trackId);
+  const track = projectStore.trackById.get(trackId);
   if (!track) return;
 
   projectStore.updateTrack(trackId, { mute: !track.mute });
@@ -948,13 +981,13 @@ function toggleTrackMute(trackId: string) {
 }
 
 function toggleTrackVisible(trackId: string) {
-  const track = tracks.value.find((item) => item.id === trackId);
+  const track = projectStore.trackById.get(trackId);
   if (!track) return;
 
   projectStore.updateTrack(trackId, { visible: track.visible === false });
   pushHistory("Toggle visibility");
   syncAudioPreview();
-  renderCharts();
+  renderCurveCharts();
 }
 
 async function browseAudioFile() {
@@ -987,12 +1020,7 @@ async function browseAudioFile() {
     return;
   }
 
-  
-  const objectUrl = URL.createObjectURL(
-    new Blob([bytes.buffer as ArrayBuffer], { // 明确告诉 TS 这是一个普通的 ArrayBuffer
-      type: extension === "wav" ? "audio/wav" : "audio/ogg",
-    }),
-  );
+  const objectUrl = createObjectUrl(bytes, { format: extension });
   const asset = projectStore.addAsset({
     fileName,
     originalPath: selected,
@@ -1026,7 +1054,7 @@ function updateSelectedPoint(axis: "speed" | "value", event: Event) {
     axis === "speed" ? { speed: value } : { value },
   );
   pushHistory("Update keyframe");
-  renderCharts();
+  renderCurveCharts();
   syncAudioPreview();
 }
 
@@ -1043,7 +1071,7 @@ function deleteSelectedPoint() {
   editorStore.clearSelection();
   pushHistory("Delete keyframe");
   syncAudioPreview();
-  renderCharts();
+  renderCurveCharts();
 }
 
 function exportReserved() {
@@ -1053,7 +1081,7 @@ function exportReserved() {
 function clearActiveSelection() {
   if (selectedKeyframe.value) {
     editorStore.selectKeyframe(null);
-    renderCharts();
+    renderCurveCharts();
     return;
   }
 
@@ -1129,16 +1157,35 @@ watch(
   () => editorStore.simulator.currentSpeed,
   (speed) => {
     speedDraft.value = speed.toFixed(1);
+    if (editorStore.playback.transport !== "playing" && !isDraggingKeyframe) {
+      renderPlayheads();
+    }
   },
   { immediate: true },
 );
 
 watch(
-  () => [projectStore.tracks, editorStore.runtime] as const,
+  () => editorStore.simulator.maxSpeed,
   () => {
     if (isPreparingKeyframeDrag || isDraggingKeyframe) return;
 
-    renderCharts();
+    renderAllCharts();
+  },
+);
+
+watch(
+  () =>
+    [
+      tracks.value,
+      activeTrackId.value,
+      activeCurveSet.value,
+      editorStore.view.tool,
+      selectedKeyframe.value,
+    ] as const,
+  () => {
+    if (isPreparingKeyframeDrag || isDraggingKeyframe) return;
+
+    renderCurveCharts();
     if (editorStore.playback.transport === "playing") {
       syncAudioPreview();
     }
@@ -1162,7 +1209,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   stopAnimationLoop();
-  audioEngine.dispose();
+  void audioEngine.dispose();
   stopCurrentKeyframeDrag();
   charts.forEach(({ stage }) => stage.destroy());
   charts.clear();

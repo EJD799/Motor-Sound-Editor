@@ -1,28 +1,9 @@
-import type { AudioAsset, CurveSetKind, Track, TrackCurve } from "@/types/track";
+import type { AudioAsset, CurveSetKind, Track } from "@/types/track";
+import { sampleCurve } from "@/utils/curves";
 
 interface PlayingTrack {
   source: AudioBufferSourceNode;
   gain: GainNode;
-}
-
-function sampleCurve(curve: TrackCurve, speed: number): number {
-  const keyframes = [...curve.keyframes].sort((a, b) => a.speed - b.speed);
-
-  if (keyframes.length === 0) return curve.kind === "pitch" ? 1 : 0;
-  if (speed <= keyframes[0].speed) return keyframes[0].value;
-
-  for (let index = 1; index < keyframes.length; index += 1) {
-    const previous = keyframes[index - 1];
-    const next = keyframes[index];
-
-    if (speed <= next.speed) {
-      const span = next.speed - previous.speed;
-      const ratio = span === 0 ? 0 : (speed - previous.speed) / span;
-      return previous.value + (next.value - previous.value) * ratio;
-    }
-  }
-
-  return keyframes[keyframes.length - 1].value;
 }
 
 export class AudioPreviewEngine {
@@ -57,9 +38,10 @@ export class AudioPreviewEngine {
 
     const warnings: string[] = [];
     const activeTracks = this.filterAudibleTracks(tracks);
+    const assetById = new Map(assets.map((asset) => [asset.id, asset]));
 
     for (const track of activeTracks) {
-      const asset = assets.find((item) => item.id === track.assetId);
+      const asset = track.assetId ? assetById.get(track.assetId) : null;
 
       if (!asset) {
         warnings.push(`${track.name} has no audio file`);
@@ -94,10 +76,11 @@ export class AudioPreviewEngine {
     if (!this.context) return;
 
     const audibleIds = new Set(this.filterAudibleTracks(tracks).map((track) => track.id));
+    const trackById = new Map(tracks.map((track) => [track.id, track]));
     const now = this.context.currentTime;
 
     this.playing.forEach((nodes, trackId) => {
-      const track = tracks.find((item) => item.id === trackId);
+      const track = trackById.get(trackId);
       const shouldPlay = track ? audibleIds.has(track.id) : false;
       const pitch = track ? sampleCurve(track.curveSets[curveSet].pitch, speed) : 1;
       const volume = track ? sampleCurve(track.curveSets[curveSet].volume, speed) : 0;
@@ -118,9 +101,15 @@ export class AudioPreviewEngine {
     this.playing.clear();
   }
 
-  dispose() {
+  async dispose() {
     this.stop();
     this.buffers.clear();
+    const context = this.context;
+    this.context = null;
+
+    if (context && context.state !== "closed") {
+      await context.close();
+    }
   }
 
   private getContext(): AudioContext {

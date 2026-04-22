@@ -39,13 +39,43 @@ export async function readFileModifiedAt(filePath: string): Promise<string> {
   return new Date().toISOString();
 }
 
-export function createObjectUrl(bytes: Uint8Array, asset: AudioAsset): string {
+export function createObjectUrl(
+  bytes: Uint8Array,
+  asset: Pick<AudioAsset, "format">,
+): string {
   const mimeType = asset.format === "wav" ? "audio/wav" : "audio/ogg";
   const buffer = bytes.buffer.slice(
     bytes.byteOffset,
     bytes.byteOffset + bytes.byteLength,
   );
   return URL.createObjectURL(new Blob([buffer], { type: mimeType }));
+}
+
+export function revokeAssetObjectUrl(asset: AudioAsset) {
+  if (!asset.objectUrl) return;
+
+  URL.revokeObjectURL(asset.objectUrl);
+  delete asset.objectUrl;
+}
+
+export function revokeDocumentObjectUrls(document: ProjectDocument | null) {
+  document?.tracks.assets.forEach(revokeAssetObjectUrl);
+}
+
+export function restoreDocumentObjectUrls(
+  document: ProjectDocument,
+  assetPayloads: Map<ID, Uint8Array>,
+) {
+  document.tracks.assets.forEach((asset) => {
+    if (asset.objectUrl) return;
+
+    const bytes = assetPayloads.get(asset.id);
+    if (bytes) {
+      asset.objectUrl = createObjectUrl(bytes, asset);
+    }
+  });
+
+  return document;
 }
 
 export function stripRuntimeAssetFields(asset: AudioAsset): AudioAsset {
