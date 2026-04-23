@@ -18,6 +18,7 @@ import { useAssetPayloadStore } from "@/stores/assetPayloads";
 import { useEditorStore } from "@/stores/editor";
 import { useHistoryStore } from "@/stores/history";
 import { useProjectStore } from "@/stores/project";
+import { useSettingsStore } from "@/stores/settings";
 import { AudioPreviewEngine } from "@/services/audioPreview";
 import { CURVE_MAX_VALUE } from "@/constants/curveRanges";
 import { sampleCurve } from "@/utils/curves";
@@ -87,6 +88,7 @@ const projectStore = useProjectStore();
 const assetPayloadStore = useAssetPayloadStore();
 const editorStore = useEditorStore();
 const historyStore = useHistoryStore();
+const settingsStore = useSettingsStore();
 const audioEngine = new AudioPreviewEngine();
 
 const pitchChartEl = ref<HTMLDivElement | null>(null);
@@ -264,6 +266,34 @@ function roundToTwo(value: number) {
   return Number(value.toFixed(2));
 }
 
+function snapToStep(value: number, step: number) {
+  return Number(
+    (Math.round(value / step) * step).toFixed(10),
+  );
+}
+
+function isShiftPressed(event: Event) {
+  return "shiftKey" in event && event.shiftKey === true;
+}
+
+function normalizeChartPoint(
+  config: ChartConfig,
+  point: { speed: number; value: number },
+  shouldSnap: boolean,
+) {
+  const speed = shouldSnap
+    ? snapToStep(point.speed, settingsStore.keyframeSnap.speedStep)
+    : point.speed;
+  const value = shouldSnap
+    ? snapToStep(point.value, settingsStore.keyframeSnap.valueStep)
+    : point.value;
+
+  return {
+    speed: clamp(speed, 0, editorStore.simulator.maxSpeed),
+    value: clamp(value, 0, config.maxValue),
+  };
+}
+
 function formatTwoDecimals(value: number | null | undefined) {
   return typeof value === "number" && Number.isFinite(value)
     ? value.toFixed(2)
@@ -400,7 +430,7 @@ function createStage(container: HTMLDivElement, config: ChartConfig) {
   };
   charts.set(config.kind, runtime);
 
-  stage.on("click tap", () => handleChartClick(runtime));
+  stage.on("click tap", (event) => handleChartClick(runtime, event.evt));
   stage.on("mouseleave", () => {
     editorStore.hoverKeyframe(null);
     setStageCursor(runtime);
@@ -532,17 +562,23 @@ function addKeyframeAtChartPoint(
   runtime: ChartRuntime,
   speed: number,
   value: number,
+  shouldSnap = false,
 ) {
   const active = activeTrack.value;
   if (!active || active.visible === false) return null;
 
+  const point = normalizeChartPoint(
+    runtime.config,
+    { speed, value },
+    shouldSnap,
+  );
   const curve = active.curveSets[activeCurveSet.value][runtime.config.kind];
   const keyframe = projectStore.addKeyframe(
     active.id,
     activeCurveSet.value,
     runtime.config.kind,
-    speed,
-    Number.isFinite(value) ? value : sampleCurve(curve, speed),
+    point.speed,
+    Number.isFinite(point.value) ? point.value : sampleCurve(curve, point.speed),
   );
 
   if (keyframe) {
@@ -772,7 +808,7 @@ function runChartContextAddKeyframe() {
   closeChartContextMenu();
 }
 
-function handleChartClick(runtime: ChartRuntime) {
+function handleChartClick(runtime: ChartRuntime, event: Event) {
   closeTransientMenus();
 
   if (suppressNextChartClick) {
@@ -845,7 +881,12 @@ function handleChartClick(runtime: ChartRuntime) {
     pointer.x,
     pointer.y,
   );
-  addKeyframeAtChartPoint(runtime, point.speed, point.value);
+  addKeyframeAtChartPoint(
+    runtime,
+    point.speed,
+    point.value,
+    isShiftPressed(event),
+  );
 }
 
 function handleChartContextMenu(
@@ -880,6 +921,11 @@ function handleChartContextMenu(
   const point = pointer
     ? canvasToPoint(runtime.stage, runtime.config, pointer.x, pointer.y)
     : { speed: editorStore.simulator.currentSpeed, value: 0 };
+  const menuPoint = normalizeChartPoint(
+    runtime.config,
+    point,
+    isShiftPressed(event.evt),
+  );
 
   closeListContextMenu();
   closeAddKeyframePanel();
@@ -887,8 +933,8 @@ function handleChartContextMenu(
   chartContextMenu.x = Math.min(event.evt.clientX, window.innerWidth - 220);
   chartContextMenu.y = Math.min(event.evt.clientY, window.innerHeight - 96);
   chartContextMenu.chartKind = runtime.config.kind;
-  chartContextMenu.speed = point.speed;
-  chartContextMenu.value = point.value;
+  chartContextMenu.speed = menuPoint.speed;
+  chartContextMenu.value = menuPoint.value;
 }
 
 function renderCharts() {
@@ -1152,16 +1198,20 @@ function renderCurveChart(runtime: ChartRuntime) {
         });
         runtime.stage.container().style.cursor = "move";
       });
-      circle.on("dragmove", () => {
+      circle.on("dragmove", (event) => {
         if (!isMoveableSelectedKeyframe(runtime, track, keyframe.id)) return;
 
         const position = circle.position();
-        const movedPoint = canvasToPoint(
-          stage,
+        const movedPoint = normalizeChartPoint(
           config,
-          position.x,
-          position.y,
+          canvasToPoint(stage, config, position.x, position.y),
+          isShiftPressed(event.evt),
         );
+        if (isShiftPressed(event.evt)) {
+          circle.position(
+            pointToCanvas(stage, config, movedPoint.speed, movedPoint.value),
+          );
+        }
         projectStore.moveKeyframeDraft(
           track.id,
           activeCurveSet.value,
@@ -1180,7 +1230,7 @@ function renderCurveChart(runtime: ChartRuntime) {
         syncAudioPreview();
         curveLayer.batchDraw();
       });
-      circle.on("dragend", () => {
+      circle.on("dragend", (event) => {
         try {
           const currentTrack = projectStore.trackById.get(track.id);
           const currentCurve =
@@ -1191,11 +1241,10 @@ function renderCurveChart(runtime: ChartRuntime) {
 
           if (currentTrack && currentCurve && currentKeyframe) {
             const position = circle.position();
-            const finalPoint = canvasToPoint(
-              stage,
+            const finalPoint = normalizeChartPoint(
               config,
-              position.x,
-              position.y,
+              canvasToPoint(stage, config, position.x, position.y),
+              isShiftPressed(event.evt),
             );
             const changed =
               Math.abs(finalPoint.speed - initialSpeed) > 0.0001 ||
@@ -1318,7 +1367,7 @@ function tick(timestamp: number) {
     nextSpeed = simulator.currentSpeed + simulator.acceleration * delta;
     hitLimit = nextSpeed >= simulator.maxSpeed;
   } else if (simulator.mode === "brake") {
-    nextSpeed = simulator.currentSpeed - simulator.brakeDeceleration * delta;
+    nextSpeed = simulator.currentSpeed - simulator.acceleration * delta;
     hitLimit = nextSpeed <= 0;
   }
 
@@ -1368,8 +1417,12 @@ function updateMaxSpeed(value: number) {
 }
 
 function updateAcceleration(value: number) {
-  projectStore.setProjectMeta({ acceleration: value });
+  projectStore.setProjectMeta({
+    acceleration: value,
+    brakeDeceleration: value,
+  });
   editorStore.setAcceleration(value);
+  editorStore.setBrakeDeceleration(value);
   pushHistory("Update acceleration");
 }
 
@@ -1403,12 +1456,16 @@ function deleteActiveTrack() {
   const track = activeTrack.value;
   if (!track) return;
 
+  const activeIndex = tracks.value.findIndex((item) => item.id === track.id);
   projectStore.removeTrack(track.id);
-  editorStore.clearActiveTrack();
-  editorStore.setTool("select");
+  const remainingTracks = tracks.value;
+  const nextTrack =
+    remainingTracks[Math.max(0, activeIndex - 1)] ??
+    remainingTracks[activeIndex] ??
+    null;
+
+  activateTrack(nextTrack?.id ?? null);
   pushHistory("Delete track");
-  syncAudioPreview();
-  renderCurveCharts();
 }
 
 function updateTrackName(event: Event) {

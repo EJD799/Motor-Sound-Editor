@@ -237,6 +237,22 @@ function handleGlobalKeydown(event: KeyboardEvent) {
   if (isTextEditingTarget(event.target)) return;
 }
 
+function handleGlobalContextMenu(event: MouseEvent) {
+  event.preventDefault();
+}
+
+function handleGlobalSelectStart(event: Event) {
+  if (isTextEditingTarget(event.target)) return;
+
+  event.preventDefault();
+}
+
+function handleGlobalCopy(event: ClipboardEvent) {
+  if (isTextEditingTarget(event.target)) return;
+
+  event.preventDefault();
+}
+
 function continuePendingExit() {
   const action = pendingExitAction.value;
   pendingExitAction.value = null;
@@ -283,6 +299,13 @@ function handleBeforeUnload(event: BeforeUnloadEvent) {
 
 onMounted(async () => {
   window.addEventListener("keydown", handleGlobalKeydown, { capture: true });
+  window.addEventListener("contextmenu", handleGlobalContextMenu, {
+    capture: true,
+  });
+  window.addEventListener("selectstart", handleGlobalSelectStart, {
+    capture: true,
+  });
+  window.addEventListener("copy", handleGlobalCopy, { capture: true });
   window.addEventListener("beforeunload", handleBeforeUnload);
   try {
     unlistenCloseRequested = await getCurrentWindow().onCloseRequested((event) => {
@@ -321,6 +344,13 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", handleGlobalKeydown, { capture: true });
+  window.removeEventListener("contextmenu", handleGlobalContextMenu, {
+    capture: true,
+  });
+  window.removeEventListener("selectstart", handleGlobalSelectStart, {
+    capture: true,
+  });
+  window.removeEventListener("copy", handleGlobalCopy, { capture: true });
   window.removeEventListener("beforeunload", handleBeforeUnload);
   unlistenCloseRequested?.();
   unlistenMsepOpenRequested?.();
@@ -404,6 +434,7 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   scrollbar-color: #526a7b rgba(13, 20, 25, 0.22);
   scrollbar-width: thin;
+  user-select: none;
 }
 
 html,
@@ -418,6 +449,12 @@ body,
 button,
 input {
   font: inherit;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
 }
 
 button {

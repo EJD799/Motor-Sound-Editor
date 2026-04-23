@@ -61,7 +61,8 @@ export function createProjectDocument(
         updatedAt: now,
         maxSpeed: payload.maxSpeed ?? 120,
         acceleration: payload.acceleration ?? 1.2,
-        brakeDeceleration: payload.brakeDeceleration ?? 1.2,
+        brakeDeceleration:
+          payload.brakeDeceleration ?? payload.acceleration ?? 1.2,
       },
     },
     tracks: {
