@@ -1,14 +1,14 @@
 ---
-title: 编辑器与轨道层
-description: 中文编辑器与轨道层占位。
+title: 编辑器工作区
+description: 中文详细手册预留页。
 ---
 
 <LocaleReserveNotice
-  eyebrow="Guide Reserved"
-  title="中文《编辑器与轨道层》稍后提供"
-  description="这个页面未来会补充左侧工具栏、双图表编辑区、轨道层、Track Details、Transport 和实时预览的中文说明。"
-  primary-text="Open English editor guide"
+  eyebrow="中文文档预留"
+  title="编辑器工作区章节正在整理"
+  description="这一页后续会补充工具模式、图表工作区、轨道侧栏、底部传输条和整体编辑节奏的中文说明。"
+  primary-text="查看英文正式版"
   primary-link="/docs/guide/editor"
-  secondary-text="Back to Chinese docs"
+  secondary-text="返回中文文档首页"
   secondary-link="/zh/docs/"
 />

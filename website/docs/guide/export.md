@@ -1,75 +1,101 @@
 ---
 title: Export Workflow
-description: Native export workflow behavior and packaging notes.
+description: Prepare and export a project package from Motor Sound Editor.
 ---
 
 # Export Workflow
 
-Motor Sound Editor ships with a structured native export workflow that turns an authored project into a ready-to-test package. The current packaged output is built around the BVE-style folder and file structure used by the app today, while the authoring workflow itself is described here more broadly as the product's export pipeline.
+Export packages the project into a deliverable archive. In the current user build, the active export target exposed by the dialog is **BVE**.
 
-## What makes a track exportable
+## Where export starts
 
-A track is considered exportable when it is:
+Export is available from the editor. Open the export dialog when you are ready to turn the current project into a packaged output.
 
-- enabled
-- not muted
-- assigned to an audio asset
+## Export dialog fields
 
-If no track satisfies those conditions, export is intentionally blocked.
+The dialog currently includes:
 
-## Current packaging behavior
+- **Export format**
+- **Sample rate**
 
-- output container: `.zip`
-- packaged structure: current BVE-style layout
-- accepted source audio: `wav`, `ogg`
-- `ogg` is decoded and converted to `wav` during export
-- exported WAV encoding: `PCM16`
-- selectable sample rates:
-  - `22050`
-  - `32000`
-  - `44100`
-  - `48000`
-  - `96000`
+### Export format
 
-## Output structure
+The interface shows these entries:
 
-```text
-<ProjectName>.zip
-\-- <ProjectName>/
-    |-- vehicle.txt
-    |-- motornoise/
-    |   |-- motornoise.txt
-    |   |-- powerfreq.csv
-    |   |-- powervol.csv
-    |   |-- brakefreq.csv
-    |   \-- brakevol.csv
-    \-- sound/
-        |-- Sound.txt
-        |-- sound_1.wav
-        |-- sound_2.wav
-        \-- ...
-```
+- `BVE`
+- `OpenBVE`
+- `MTR`
 
-## What those files do
+At the moment:
 
-### `vehicle.txt`
+- `BVE` is the active selectable target
+- `OpenBVE` and `MTR` are visible but disabled
 
-Points the packaged project to `sound\Sound.txt` and `motornoise\motornoise.txt`.
+The documentation reflects the current behavior of the application, not future roadmap assumptions.
 
-### `motornoise/*.csv`
+### Sample rate
 
-Stores sampled data derived from the project keyframe curves.
+The current build allows these sample rates:
 
-### `Sound.txt`
+- `22050`
+- `32000`
+- `44100`
+- `48000`
+- `96000`
 
-Maps exported track indices to generated WAV files.
+Choose a rate based on your workflow requirements, compatibility expectations, and file-size tolerance.
 
-## Practical export advice
+## OGG handling during export
 
-- check which tracks are still muted, hidden, or inactive in your workflow
-- make sure every track you expect to hear is actually assigned to audio
-- remember that OGG inputs become WAV on export, which can change final package size
+If the project includes `ogg` tracks, the export dialog can warn that OGG audio will be converted to WAV for BVE export.
 
-::: tip Export note
-The current packaged output follows the BVE-oriented structure used by the application today. As the export system evolves, this page should remain the source of truth for the formats and package layouts that are actually shipped.
-:::
+As a user, the practical takeaway is:
+
+- you may author with `ogg`
+- the packaged output can convert that audio for the active export pipeline
+
+## Output format
+
+The export output is written as a `.zip` archive. The native backend assembles the package structure, generates table content from the project curves, and writes the necessary audio files.
+
+From a user's perspective, export is successful when you receive a finished archive at the selected output location.
+
+## Before you export
+
+Check these items first:
+
+- the correct project is open
+- track names and assignments are what you expect
+- the intended curves are active and previewed
+- muted or hidden tracks are not accidentally left out of your plan
+- the sample rate is appropriate
+- the project has been saved recently
+
+## Recommended export routine
+
+1. Save the project.
+2. Preview the key speed ranges one more time.
+3. Open the export dialog.
+4. Confirm the active export format and sample rate.
+5. Choose an output location.
+6. Run export.
+7. Archive the resulting `.zip` alongside the `.msep` source file.
+
+## Common export questions
+
+### Why is only BVE active?
+
+Because that is the current implemented export target in the present build.
+
+### Does export require WAV only?
+
+No. The editor can work with `wav` and `ogg`, and the current export pipeline can convert OGG audio to WAV when required by the active BVE path.
+
+### Should I export instead of saving?
+
+No. Save preserves the editable `.msep` source project. Export produces a packaged output. They serve different purposes and you usually want both.
+
+## Related reading
+
+- [Project Details and Save](/docs/guide/project-details-and-save)
+- [Refine Curves and Export](/docs/tutorials/refine-curves-and-export)

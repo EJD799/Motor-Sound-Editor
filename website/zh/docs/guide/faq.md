@@ -1,14 +1,14 @@
 ---
 title: 常见问题
-description: 中文 FAQ 占位。
+description: 中文详细手册预留页。
 ---
 
 <LocaleReserveNotice
-  eyebrow="Guide Reserved"
-  title="中文 FAQ 稍后提供"
-  description="这里后续会补充 `.msep`、当前支持格式、导出边界、设置页状态和产品限制等中文问答。"
-  primary-text="Open English FAQ"
+  eyebrow="中文文档预留"
+  title="常见问题章节正在整理"
+  description="这一页后续会补充 .msep、支持音频格式、导出限制、隐藏轨道行为和当前能力边界的中文答疑。"
+  primary-text="查看英文正式版"
   primary-link="/docs/guide/faq"
-  secondary-text="Back to Chinese docs"
+  secondary-text="返回中文文档首页"
   secondary-link="/zh/docs/"
 />

@@ -1,5 +1,5 @@
 :root {
-  --mse-font-display: "Sora", "Segoe UI", sans-serif;
+  --mse-font-display: "Space Grotesk", "Segoe UI", sans-serif;
   --mse-font-body: "Plus Jakarta Sans", "Segoe UI", sans-serif;
   --mse-font-mono: "IBM Plex Mono", "Cascadia Code", monospace;
 
@@ -92,7 +92,7 @@ h4,
 .learn-card h3,
 .cta-panel h2 {
   font-family: var(--mse-font-display);
-  letter-spacing: -0.05em;
+  letter-spacing: -0.035em;
 }
 
 a,

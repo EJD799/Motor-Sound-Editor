@@ -1,56 +1,45 @@
 ---
 title: FAQ
-description: Frequently asked questions about the current product state.
+description: Common questions about file formats, limits, and current behavior.
 ---
 
 # FAQ
 
-## What is `.msep`
+## What is `.msep`?
 
-`.msep` is the current native project format for Motor Sound Editor. It is a ZIP-based container used to preserve:
+`.msep` is the editable project container used by Motor Sound Editor. It stores project metadata, track definitions, curve data, and referenced audio together so the project can be reopened and moved as one unit.
 
-- project metadata
-- tracks and keyframes
-- packaged audio assets
+## Which audio formats can I assign to tracks?
 
-Its purpose is to keep a project editable, not to act like the final packaged export deliverable.
-
-## Which audio formats are supported right now
-
-The current track assignment workflow supports:
+The current build supports assigning:
 
 - `wav`
 - `ogg`
 
-## Why do I see other export names in the UI
+## Why do I see traction, coasting, and brake if only traction and brake curve sets are editable?
 
-Because the UI leaves room for future directions, but the only shipped packaged output right now follows the current BVE-style structure used by the app.
+Because the preview system exposes three simulator states, while the current authoring model stores dedicated traction and brake curve sets. In the present build, coasting remains part of the traction-side authoring path.
 
-## Why is there not a finished settings screen yet
+## Can I preview multiple tracks at the same time?
 
-The codebase already contains settings-related state, but the full settings experience is not complete, so the current site should not market it as shipped.
+Yes. The preview engine is designed for layered playback as long as the tracks are audible and have valid assigned audio.
 
-## What usually causes export failure
+## Are hidden tracks audible?
 
-Typical reasons include:
+No. In the current implementation, preview uses tracks that are enabled, not muted, and not hidden.
 
-- no eligible exportable tracks
-- missing audio assignments
-- invalid or unavailable output path
+## Does replacing track audio keep old files in the saved project forever?
 
-## Is this meant to be a general-purpose audio workstation
+No. Save and Save As prune unreferenced audio from the resulting `.msep` package so replaced audio does not continue to accumulate inside the saved file.
 
-No. It is much closer to a dedicated railway motor sound authoring tool. The focus is:
+## Is there a finished settings page?
 
-- project management
-- speed-curve editing
-- realtime preview
-- export-ready project authoring
+No. There is a settings store in the codebase, but there is no finished settings screen in the current user-facing build.
 
-## What limits should I keep in mind today
+## Which export targets work right now?
 
-- the current source version is still `v0.0.1`
-- the product story is Windows-first
-- the shipped packaged output is still narrowly scoped
-- the settings experience is incomplete
-- automated testing coverage is still limited
+The export dialog currently exposes BVE as the active working target. Other listed targets are visible but disabled.
+
+## Should I rely only on export output and skip saving the `.msep` file?
+
+No. The `.msep` file is your editable source project. Exported packages are deliverables, not replacements for the editable master file.

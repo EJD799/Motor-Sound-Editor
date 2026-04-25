@@ -1,131 +1,99 @@
 ---
-title: Editor & Track Layers
-description: Editor layout, track management, and preview behavior.
+title: Editor Workspace
+description: Understand the editor as the main authoring environment.
 ---
 
-# Editor & Track Layers
+# Editor Workspace
 
-The editor is where the product becomes specific. The layout is tuned around selecting tracks, shaping curves, and hearing the effect immediately.
+The editor is the center of the product. It combines track management, speed-based curve authoring, live preview, and export preparation in one desktop workspace.
 
-## Main layout zones
+![Motor Sound Editor editor workspace](/editpage.png)
 
-The current editor is organized into four primary areas:
+## What the editor is optimized for
 
-- left tool rail
-- center dual-chart workspace
-- right track and detail panels
-- bottom transport and simulator bar
+The editor is not a generic DAW timeline and it is not a spreadsheet replacement with nicer colors. It is optimized for one specific job:
 
-## Left tool rail
+- map speed to pitch and volume
+- manage multiple layers
+- listen to the result immediately
+- preserve the work in a structured project file
 
-### Tool modes
+## Tool modes
 
-The current tool modes are:
+The left toolbar exposes the main interaction modes:
 
-- `Select Mode`
-- `Move Mode`
-- `Keyframe`
+- **Select**: focus on choosing tracks or points
+- **Move**: adjust positions of existing keyframes
+- **Keyframe**: add or delete points directly in the chart workflow
 
-These modes affect how keyframes are selected, inserted, and dragged inside the chart editor.
+If an action does not behave the way you expect, check the active tool first. Many chart interactions are mode-dependent.
 
-### Current speed
+## The two-chart model
 
-The left side also exposes `Current Speed`, which drives both chart context and realtime preview behavior.
+The editor uses two stacked charts:
 
-### Export and return
+- **Pitch** on top
+- **Volume** below
 
-The lower area of the rail includes:
+This separation is important. Even when the same speed region is involved, the tonal behavior and loudness behavior are edited independently.
 
-- `Export File`
-- `Return Home`
+## Active track and active curve set
 
-If the current project is dirty, returning home triggers an unsaved-changes confirmation first.
+Almost every chart action depends on two active contexts:
 
-## Dual-chart workspace
+- the **active track**
+- the **active curve set**
 
-The center workspace contains two separate charts:
+The active curve set follows the current simulator mode:
 
-- upper `Pitch`
-- lower `Volume`
+- when the simulator is in **brake**, the editor works on the brake curve set
+- otherwise, the editor works on the traction curve set
 
-Each chart renders the active track within the currently selected curve set.
+In practical terms, coasting is previewed as part of the traction-side authoring flow in the current build.
 
-## Keyframe editing
+## Reading the chart area
 
-The current implementation already supports:
+Each chart uses speed on the horizontal axis and a behavior value on the vertical axis:
 
-- inserting keyframes
-- selecting keyframes
-- dragging keyframes
-- deleting keyframes
-- editing values numerically
+- pitch values control playback rate behavior
+- volume values control gain behavior
 
-Curve data is separated into:
+The charts are designed to help you read transitions, plateaus, and abrupt changes at a glance.
 
-- `traction`
-- `brake`
+## Project context visible in the editor
 
-And each set contains:
+The editor keeps several project-wide values close at hand:
 
-- `pitch`
-- `volume`
-
-## Track layer management
-
-The `Track Layers` panel is the main control surface for multi-track work. It supports:
-
-- adding tracks
-- deleting the active track
-- choosing the active track
-- renaming
-- recoloring
-- mute / unmute
-- show / hide
-- enable / disable
-- audio file assignment
-
-This is the layer-management core of the product, especially when shaping several motor sound bands together.
-
-## Track details
-
-The `Track Details` area exposes editable information for the active track, including:
-
-- track name
-- color
-- assigned file
-- other active-track properties available in the current UI
-
-If no track is active, the panel shows an empty state.
-
-## List editor
-
-The visual chart editor is paired with a list editor for precision work:
-
-- edit speed / value pairs directly
-- inspect traction / brake pitch / volume side by side
-- work numerically when gesture-based editing is not enough
-
-This makes the app usable for both exploratory editing and exact-value cleanup.
-
-## Realtime preview
-
-The bottom transport area provides:
-
-- play / pause
-- `Traction`
-- `Coasting`
-- `Brake`
-- max speed
+- current speed
+- simulator mode
+- maximum speed
 - acceleration
+- brake deceleration
 
-As speed or mode changes, the preview engine updates the layered audio result so curve edits can be evaluated immediately.
+These values give context to every keyframe decision you make.
 
-## Project detail and editing history
+## Export and return-home actions
 
-The current editor also includes:
+The editor sidebar also includes:
 
-- undo / redo history
-- project details dialog
-- unsaved-change confirmation when leaving
+- **Export File**
+- **Return Home**
 
-Those details matter because this is intended to be a repeatable editing workflow, not a one-shot converter.
+Export lets you package the project without leaving the editor. Return Home exits back to the project gallery. If the project has unsaved changes, the app can prompt you before leaving.
+
+## Working rhythm
+
+A typical editing rhythm looks like this:
+
+1. choose the active track
+2. choose the simulator mode
+3. add or move keyframes
+4. preview at speed
+5. refine values numerically if needed
+6. save
+
+That rhythm is deliberate. The interface is arranged to make the loop short.
+
+## Next steps
+
+Continue with [Tracks and Audio](/docs/guide/tracks-and-audio) to understand how tracks are selected, named, and linked to audio files.

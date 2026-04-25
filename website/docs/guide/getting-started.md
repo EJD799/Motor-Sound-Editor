@@ -1,69 +1,80 @@
 ---
-title: Quick Start
-description: Quick start for Motor Sound Editor.
+title: Getting Started
+description: First-run guidance for Motor Sound Editor users.
 ---
 
-# Quick Start
+# Getting Started
 
-Motor Sound Editor is a desktop editor focused on one job: building, previewing, saving, and exporting layered railway motor sound projects without forcing creators to hand-edit raw BVE tables all day.
+Motor Sound Editor is built for creators who want to author layered motor sound projects in a visual editor instead of hand-editing raw simulator tables. The app is currently focused on project authoring, real-time preview, and export packaging around the workflows already implemented in the desktop application.
 
-## Who it is for
+![Motor Sound Editor home screen](/homepage.png)
 
-- BVE content creators
-- Authors working with traction and brake sound layers
-- Tool builders who want a project-based desktop workflow instead of loose CSV and text files
+## What the app does today
 
-## Current product state
+You can use the current build to:
 
-| Item | Current state |
-| --- | --- |
-| Source version | `v0.0.1` |
-| Primary target | Windows-first desktop workflow |
-| Native project format | `.msep` |
-| Export system | Native packaged workflow |
-| Not shipped yet | OpenBVE / MTR export, completed settings experience |
+- create a new `.msep` project with project metadata and simulator defaults
+- open an existing `.msep` project from disk
+- import a compatible `.msep` file into the app
+- manage multiple motor sound tracks inside one project
+- assign `wav` or `ogg` audio to tracks
+- edit traction and brake pitch/volume curves visually
+- preview audible behavior in traction, coasting, and brake states
+- save, save as, undo, redo, and export
 
-## Local development commands
+## What the app does not promise yet
 
-### Desktop app
+The current product should not be treated as a finished multi-format export suite. In the present build:
 
-```bash
-pnpm install
-pnpm tauri dev
-```
+- the export dialog shows **BVE** as the active export target
+- `OpenBVE` and `MTR` entries are visible in the dialog but are disabled
+- there is a settings store in code, but there is no finished settings screen
 
-### Website and docs
+That means the tool is already practical for real authoring work, but you should still treat it as an actively evolving desktop editor.
 
-```bash
-pnpm site:dev
-pnpm site:build
-pnpm site:preview
-```
+## Before you begin
 
-## Core workflow
+Prepare the following:
 
-1. Create a new `.msep` project or open an existing one.
-2. Enter the editor and choose the active track.
-3. Assign a `wav` or `ogg` audio file.
-4. Edit traction / brake pitch and volume curves.
-5. Preview the current result by changing speed and simulator mode.
-6. Save the editable project.
-7. Export a packaged build when you need distributable output.
+- one or more motor sound source files in `wav` or `ogg`
+- a rough idea of your train's maximum speed
+- a starting acceleration value
+- a working folder where you want to save the `.msep` file
 
-## Useful shortcuts
+You do not need to prepare CSV files first. The app is explicitly designed so the editor becomes your primary authoring surface.
 
-| Shortcut | Action |
-| --- | --- |
-| `Space` | Play / pause preview |
-| `W` | Step simulator mode upward toward `Traction` |
-| `S` | Step simulator mode downward toward `Brake` |
-| `Ctrl+S` | Save project |
-| `Ctrl+Shift+S` | Save project as |
-| `Ctrl+Z` | Undo |
-| `Ctrl+Y` or `Ctrl+Shift+Z` | Redo |
-| `Ctrl+D` | Clear active selection |
-| `Delete` | Delete the selected keyframe |
+## The first successful session
 
-::: tip Product boundary
-The current product story should stay disciplined. The app already covers project management, curve editing, layered preview, and a shipped export workflow, but it should not be presented as if broader export ecosystems or a complete settings workflow are already done.
-:::
+Use this sequence if you want to confirm that the app works correctly on your machine:
+
+1. Launch the application and stay on the Home screen.
+2. Choose **New Project**.
+3. Enter a project name.
+4. Set a reasonable maximum speed and acceleration.
+5. Enter the editor.
+6. Add or activate a track if needed.
+7. Assign an audio file to that track.
+8. Add a few keyframes in the chart or edit values through the list editor.
+9. Press `Space` to preview.
+10. Save the project as a `.msep` file.
+
+If you can complete those ten steps, the core workflow is working as intended.
+
+## Understanding `.msep`
+
+`.msep` is the app's project container. It keeps the project description, track setup, curve data, and bundled audio together so you are not forced to manage a fragile collection of loose files by hand.
+
+From a user perspective, the practical meaning is simple:
+
+- save the `.msep` file when you want to preserve work
+- reopen the same file later to continue editing
+- move the file to another machine or storage location as one project unit
+
+## Recommended first reading
+
+After this page, continue in this order:
+
+1. [Home and Projects](/docs/guide/home)
+2. [Interface Overview](/docs/guide/interface-overview)
+3. [Editor Workspace](/docs/guide/editor)
+4. [First Project](/docs/tutorials/first-project)

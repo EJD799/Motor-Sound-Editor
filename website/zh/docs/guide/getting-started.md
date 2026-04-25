@@ -1,14 +1,14 @@
 ---
 title: 快速开始
-description: 中文快速开始占位。
+description: 中文详细手册预留页。
 ---
 
 <LocaleReserveNotice
-  eyebrow="Guide Reserved"
-  title="中文《快速开始》稍后提供"
-  description="这个路径已经固定下来，后续会补充中文版的产品定位、命令、工作流和快捷键内容。当前请优先阅读英文 quick start。"
-  primary-text="Open English quick start"
+  eyebrow="中文文档预留"
+  title="快速开始章节正在整理"
+  description="这一页后续会补充中文版本的首次启动说明、工作流概览、当前支持能力和入门建议。"
+  primary-text="查看英文正式版"
   primary-link="/docs/guide/getting-started"
-  secondary-text="Back to Chinese docs"
+  secondary-text="返回中文文档首页"
   secondary-link="/zh/docs/"
 />

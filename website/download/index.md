@@ -8,7 +8,7 @@ description: Download placeholder for Motor Sound Editor.
     <div>
       <span class="download-panel__eyebrow">Download</span>
       <h1>Release delivery is reserved. The product story is ready.</h1>
-      <p class="download-panel__lead">This page intentionally acts as a polished placeholder until installer packaging and release distribution are ready. The current source version is <strong>v0.0.1</strong>, and the desktop workflow is still positioned as <strong>Windows-first</strong>.</p>
+      <p class="download-panel__lead">This page intentionally acts as a polished placeholder until installer packaging and release distribution are ready. The current source version is <strong>v1.0.0</strong>, and the desktop workflow is still positioned as <strong>Windows-first</strong>.</p>
       <div class="download-actions">
         <a class="primary" href="/docs/guide/getting-started">Read the docs first</a>
         <a class="secondary" href="/">Back to product overview</a>

@@ -1,76 +1,88 @@
 ---
-title: Home & Projects
-description: Home page and project management behavior.
+title: Home and Projects
+description: Use the home screen to create, open, import, search, and manage projects.
 ---
 
-# Home & Projects
+# Home and Projects
 
-The home page is the project-entry surface for the desktop app. It is not just a welcome screen; it already manages project creation, loading, importing, search, sorting, and recent-project browsing.
+The Home screen is your project hub. It is where you create new work, reopen existing files, import external `.msep` packages, and browse recent projects.
 
-## What the home page includes
+![Motor Sound Editor home gallery](/homepage.png)
 
-- A left-side action rail
-  - `New Project`
-  - `Open File`
-  - `Import File`
-  - `Settings` as a reserved entry
-- A central workspace
-  - project search
-  - date / name sorting
-  - recent-project gallery
-- A bottom status area
-  - current app version display
+## Sidebar actions
 
-## Creating a new project
+The left sidebar is action-oriented. It contains the entry points that start or resume work:
 
-`New Project` opens a dialog where the current implementation lets you set:
+- **New Project** opens the new-project dialog and creates a fresh working document.
+- **Open File** opens an existing `.msep` file from disk.
+- **Import File** imports a `.msep` file through the app's import route.
+- **Settings** is present in the layout, but there is no finished settings screen in the current user build.
+
+## The recent projects area
+
+The main area lists recent projects as cards. Each card can show:
+
+- the project name
+- the last modified timestamp
+- a compact preview of the project's line structure
+
+These cards are meant to reduce context-switching. Instead of remembering which file belonged to which sound set, you can visually identify a recent project and reopen it quickly.
+
+## Search
+
+The search field filters the recent project list by text. Use it when:
+
+- your recent list is long
+- you remember part of a project name
+- you want to narrow the list before sorting
+
+Search is most useful when your naming scheme is consistent, for example by train class, operator, or project stage.
+
+## Sorting
+
+The Home screen supports at least two useful sort modes:
+
+- **Date**: best when you want to return to the project you touched most recently
+- **Name**: best when you manage multiple parallel projects and rely on naming conventions
+
+Use date sorting during active production and name sorting during library-style browsing.
+
+## Opening a project
+
+You can open a project from:
+
+- the **Open File** action
+- the **Import File** action
+- a card in the recent-project gallery
+
+If the file is valid, the app will load its project metadata, tracks, curves, and bundled audio into the editor.
+
+## Removing a project from the recent list
+
+The recent-project view can remove a project entry from the recent list. This affects the list, not the project's actual file on disk. Use it when:
+
+- the file has moved
+- the entry is no longer relevant
+- you want a cleaner recent-project panel
+
+## New project fields
+
+When you create a new project, the app asks for core metadata and simulator defaults. Expect fields for:
 
 - project name
-- max speed
+- maximum speed
 - acceleration
+- brake deceleration or a related braking default
 
-After choosing a save location, the app writes the `.msep` project immediately and moves into the editor.
+These values do more than label the file. They shape how the editor clamps curve speed ranges and how the preview system interprets the project.
 
-## Opening vs importing
+## Practical advice
 
-### Open File
+- Name the project clearly before doing detailed edits. It makes recent-project browsing much easier later.
+- Set a believable maximum speed early, because many editing decisions depend on the visible speed range.
+- Use **Import File** when the project already exists as a packaged `.msep`.
+- Use **Open File** when you simply want to continue normal editing from disk.
 
-- opens a `.msep` project directly
-- loads project content into the active editor session
-- transitions straight from the home page into editing
+## Next steps
 
-### Import File
-
-- reads a `.msep` file into the recent-project gallery
-- does not immediately open the editor
-- is useful when building a local working set of projects first
-
-## Recent project gallery
-
-Project cards can display:
-
-- project name
-- last modified timestamp
-- generated preview lines sampled from project curve data
-
-That preview treatment helps users distinguish projects without opening each file.
-
-## Search and sorting
-
-- search filters by project name
-- sorting supports `Date` and `Name`
-- the empty state encourages either a different query or creating a new project
-
-## Drag and drop import
-
-The desktop window supports dropping `.msep` files directly onto the app:
-
-- only `.msep` files are accepted
-- multiple files can be imported at once
-- successful imports show a result toast
-
-## Current limitations
-
-- `Import File` adds a project to the gallery but does not enter the editor
-- `Settings` is still a reserved entry, not a completed settings workflow
-- home-page management is centered on `.msep`, not arbitrary external project formats
+Continue with [Interface Overview](/docs/guide/interface-overview) to understand how the home screen connects to the editor.

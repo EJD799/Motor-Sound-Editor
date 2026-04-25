@@ -1,4 +1,4 @@
 ---
 title: Motor Sound Editor
-description: Reserved Simplified Chinese landing route.
+description: Motor Sound Editor 中文主页。
 ---
