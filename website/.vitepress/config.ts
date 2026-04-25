@@ -25,12 +25,10 @@ const englishTutorialSidebar = [
 const chineseManualSidebar = [
   { text: "文档首页", link: "/zh/docs/" },
   { text: "快速开始", link: "/zh/docs/guide/getting-started" },
-  { text: "首页与项目", link: "/zh/docs/guide/home" },
   { text: "界面总览", link: "/zh/docs/guide/interface-overview" },
-  { text: "编辑器工作区", link: "/zh/docs/guide/editor" },
+  { text: "首页", link: "/zh/docs/guide/home" },
+  { text: "编辑页", link: "/zh/docs/guide/editor" },
   { text: "轨道与音频", link: "/zh/docs/guide/tracks-and-audio" },
-  { text: "曲线编辑", link: "/zh/docs/guide/curve-editing" },
-  { text: "预览与运行状态", link: "/zh/docs/guide/transport-and-preview" },
   { text: "列表编辑器", link: "/zh/docs/guide/list-editor" },
   { text: "项目详情与保存", link: "/zh/docs/guide/project-details-and-save" },
   { text: "导出流程", link: "/zh/docs/guide/export" },
@@ -40,10 +38,10 @@ const chineseManualSidebar = [
 
 const chineseTutorialSidebar = [
   { text: "创建第一个项目", link: "/zh/docs/tutorials/first-project" },
-  { text: "分配音频并试听", link: "/zh/docs/tutorials/assign-audio-and-preview" },
-  { text: "打磨曲线并导出", link: "/zh/docs/tutorials/refine-curves-and-export" },
 ];
-
+const chineseDevelopersSidebar = [
+  { text: "开发者相关", link: "/zh/docs/developers/for-developers.md" },
+];
 const sharedThemeConfig = {
   logo: "/64x64.png",
   socialLinks: [
@@ -141,6 +139,10 @@ export default defineConfig({
             {
               text: "教程",
               items: chineseTutorialSidebar,
+            },
+            {
+              text: "针对开发者",
+              items: chineseDevelopersSidebar,
             },
           ],
         },

@@ -1,14 +1,20 @@
 ---
 title: 快捷键
-description: 中文详细手册预留页。
+description: 日常编辑常用键盘快捷键与交互约定。
 ---
 
-<LocaleReserveNotice
-  eyebrow="中文文档预留"
-  title="快捷键章节正在整理"
-  description="这一页后续会补充播放、保存、撤销、重做、清除选择和删除关键帧相关快捷键的中文说明。"
-  primary-text="查看英文正式版"
-  primary-link="/docs/guide/shortcuts"
-  secondary-text="返回中文文档首页"
-  secondary-link="/zh/docs/"
-/>
+# 快捷键
+
+Motor Sound Editor提供了一些快捷键，掌握少量高频快捷键后，Motor Sound Editor 的主编辑循环会明显更顺手。
+
+## 全局编辑快捷键
+
+- `Space`：播放 / 暂停预览
+- `Ctrl+S`：保存
+- `Ctrl+Shift+S`：另存为
+- `Ctrl+Z`：撤销
+- `Ctrl+Y`：重做
+- `Ctrl+Shift+Z`：重做
+- `Ctrl+D`：清除当前选择
+- `Delete`：删除选中关键帧
+

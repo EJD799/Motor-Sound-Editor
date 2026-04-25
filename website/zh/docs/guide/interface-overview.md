@@ -1,14 +1,36 @@
 ---
 title: 界面总览
-description: 中文详细手册预留页。
+description: 在深入单个工具前，先把应用当作完整工作流来理解。
 ---
 
-<LocaleReserveNotice
-  eyebrow="中文文档预留"
-  title="界面总览章节正在整理"
-  description="这一页后续会补充首页、编辑器、图表区、轨道侧栏和底部传输条的中文总览。"
-  primary-text="查看英文正式版"
-  primary-link="/docs/guide/interface-overview"
-  secondary-text="返回中文文档首页"
-  secondary-link="/zh/docs/"
-/>
+# 界面总览
+
+Motor Sound Editor 的设计将项目管理与工程编辑在空间上进行了明确划分，以确保工作流的清晰：
+
+
+
+
+
+### 首页 (Home)：项目生命周期管理
+
+![标注首页](/docs/labledhome.png)
+首页作为资产的逻辑起点，主要负责处理管理任务：
+
+* **工程索引**：快速查找某个工程文件。
+* **资产调度**：执行新建、导入或打开工程文件的操作。
+
+### 编辑器 (Editor)：多维参数合成引擎
+
+![标注编辑页面](/docs/lablededit.png)
+编辑页是软件的核心，重点在于在于：
+
+* **层级控制**：明确当前激活的音轨层级与声源属性。
+* **实时预览**：模拟在不同速度的状态下，对音高（Pitch）与音量（Volume）的即时校验听感表现。
+* **数据修改**：对关键帧执行可视化的位移、增删与数值微调。
+
+## 推荐阅读
+
+阅读完总览后，建议继续：
+
+1. [首页](/zh/docs/guide/home)
+2. [编辑页](/zh/docs/guide/editor)
