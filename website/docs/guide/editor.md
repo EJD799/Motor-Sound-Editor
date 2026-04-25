@@ -1,99 +1,65 @@
----
+﻿---
 title: Editor Workspace
-description: Understand the editor as the main authoring environment.
+description: Understand the editor's main regions and interaction model.
 ---
 
 # Editor Workspace
 
-The editor is the center of the product. It combines track management, speed-based curve authoring, live preview, and export preparation in one desktop workspace.
+The editor workspace is the core operating environment of Motor Sound Editor. It is where you manage sound tracks, assign audio assets, and fine-tune how pitch and volume change across traction and braking behavior.
 
-![Motor Sound Editor editor workspace](/editpage.png)
+![Annotated editor screen](/docs/lablededit.png)
 
-## What the editor is optimized for
+The workspace is divided into four main regions:
 
-The editor is not a generic DAW timeline and it is not a spreadsheet replacement with nicer colors. It is optimized for one specific job:
+1. **Toolbar**: global tool-mode switching and project actions.
+2. **Track Sidebar**: the panel on the right for managing tracks, audio files, and track state.
+3. **Main Workspace**: the central chart area for curve editing and keyframe work.
+4. **Status Bar**: the bottom bar for real-time preview and speed/state control.
 
-- map speed to pitch and volume
-- manage multiple layers
-- listen to the result immediately
-- preserve the work in a structured project file
+## 1. Toolbar
 
-## Tool modes
+The top toolbar contains the global controls that affect how you interact with the workspace.
 
-The left toolbar exposes the main interaction modes:
+![Tools](/docs/tools.png)
 
-- **Select**: focus on choosing tracks or points
-- **Move**: adjust positions of existing keyframes
-- **Keyframe**: add or delete points directly in the chart workflow
+- **Tool Mode** decides how you interact with curves and keyframes.
+  - **Select** is the default mode for choosing keyframes.
+  - **Move** lets you drag the selected keyframe and change its position and value.
+  - **Keyframe** lets you insert a keyframe with left click or remove one quickly with right click.
+- **Snap** can be enabled temporarily by holding `Shift`. The current defaults snap speed to multiples of `0.5` and values to multiples of `0.2`.
 
-If an action does not behave the way you expect, check the active tool first. Many chart interactions are mode-dependent.
+## 2. Track Sidebar
 
-## The two-chart model
+The sidebar combines ideas from layer management and mixing so you can organize every motor-sound track in the project.
 
-The editor uses two stacked charts:
+<img src="/docs/trackbar.png" width="200" alt="Track sidebar">
 
-- **Pitch** on top
-- **Volume** below
+- **Track List** shows every track in the current project. Clicking a track makes it the **active track**, and the main chart updates to show that track's curves.
+- **Asset Assignment** lets you assign or replace the local audio file used by a track.
+- **Track Controls** include:
+  - **Show / Hide** to control whether the track is visible in the chart.
+  - **Mute** to temporarily silence the track during preview.
 
-This separation is important. Even when the same speed region is involved, the tonal behavior and loudness behavior are edited independently.
+## 3. Main Workspace
 
-## Active track and active curve set
+This is the core area for editing dynamic sound behavior. The horizontal axis represents speed, while the vertical axis represents pitch or volume.
 
-Almost every chart action depends on two active contexts:
+![Workspace](/docs/labledworkspace.png)
 
-- the **active track**
-- the **active curve set**
+Each track keeps two independent curve environments:
 
-The active curve set follows the current simulator mode:
+- **Traction / Brake** for acceleration and braking behavior.
+- **Pitch** curves for playback-rate or frequency change.
+- **Volume** curves for loudness change across the speed range.
 
-- when the simulator is in **brake**, the editor works on the brake curve set
-- otherwise, the editor works on the traction curve set
+At the moment, the data model stores only dedicated **Traction** and **Brake** curve sets. During preview, **Coasting** still uses the traction-side curves.
 
-In practical terms, coasting is previewed as part of the traction-side authoring flow in the current build.
+## 4. Status Bar
 
-## Reading the chart area
+The bottom bar is used for real-time preview and simulator-state control.
 
-Each chart uses speed on the horizontal axis and a behavior value on the vertical axis:
+![Status bar](/docs/statusbar.png)
 
-- pitch values control playback rate behavior
-- volume values control gain behavior
-
-The charts are designed to help you read transitions, plateaus, and abrupt changes at a glance.
-
-## Project context visible in the editor
-
-The editor keeps several project-wide values close at hand:
-
-- current speed
-- simulator mode
-- maximum speed
-- acceleration
-- brake deceleration
-
-These values give context to every keyframe decision you make.
-
-## Export and return-home actions
-
-The editor sidebar also includes:
-
-- **Export File**
-- **Return Home**
-
-Export lets you package the project without leaving the editor. Return Home exits back to the project gallery. If the project has unsaved changes, the app can prompt you before leaving.
-
-## Working rhythm
-
-A typical editing rhythm looks like this:
-
-1. choose the active track
-2. choose the simulator mode
-3. add or move keyframes
-4. preview at speed
-5. refine values numerically if needed
-6. save
-
-That rhythm is deliberate. The interface is arranged to make the loop short.
-
-## Next steps
-
-Continue with [Tracks and Audio](/docs/guide/tracks-and-audio) to understand how tracks are selected, named, and linked to audio files.
+- **Play / Pause** starts or stops the preview engine.
+- **State buttons** switch between **Traction**, **Coasting**, and **Brake** so you can check how the sound transitions between train states. You can also use `W` and `S`.
+- **Current Speed** controls the preview speed, making it easier to inspect curve behavior at specific points.

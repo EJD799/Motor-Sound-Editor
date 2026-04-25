@@ -1,80 +1,90 @@
----
+﻿---
 title: Getting Started
 description: First-run guidance for Motor Sound Editor users.
 ---
 
 # Getting Started
 
-Motor Sound Editor is built for creators who want to author layered motor sound projects in a visual editor instead of hand-editing raw simulator tables. The app is currently focused on project authoring, real-time preview, and export packaging around the workflows already implemented in the desktop application.
+Motor Sound Editor is built for creators who want to design layered motor sound projects in a visual editor instead of hand-maintaining raw simulator tables. The current version is focused on three core workflows already implemented in the desktop app: project authoring, real-time preview, and export packaging.
 
 ![Motor Sound Editor home screen](/homepage.png)
 
-## What the app does today
+## 1. Preparation
 
-You can use the current build to:
+### Operating system
 
-- create a new `.msep` project with project metadata and simulator defaults
-- open an existing `.msep` project from disk
-- import a compatible `.msep` file into the app
-- manage multiple motor sound tracks inside one project
-- assign `wav` or `ogg` audio to tracks
-- edit traction and brake pitch/volume curves visually
-- preview audible behavior in traction, coasting, and brake states
-- save, save as, undo, redo, and export
+**Windows** is the primary supported platform today.
 
-## What the app does not promise yet
+### Download and install
 
-The current product should not be treated as a finished multi-format export suite. In the present build:
+- **Get the app**: You can use the [English download page](/download/) or [GitHub Releases](https://github.com/xiangao0904/Motor-Sound-Editor/releases) to find the latest Windows installer.
+- **Quick install**: After downloading, run the installer. No extra runtime setup is required because the Tauri dependencies are already bundled with the app.
 
-- the export dialog shows **BVE** as the active export target
-- `OpenBVE` and `MTR` entries are visible in the dialog but are disabled
-- there is a settings store in code, but there is no finished settings screen
+### Data and assets
 
-That means the tool is already practical for real authoring work, but you should still treat it as an actively evolving desktop editor.
+- **Assets**: Prepare at least one motor sound source file in `.wav` or `.ogg`.
+- **Parameters**: Prepare the train's basic performance values, such as maximum speed, acceleration, and brake deceleration.
 
-## Before you begin
+## 2. Core workflow
 
-Prepare the following:
+You can experience the main features of the app through these six steps:
 
-- one or more motor sound source files in `wav` or `ogg`
-- a rough idea of your train's maximum speed
-- a starting acceleration value
-- a working folder where you want to save the `.msep` file
+### Step 1: Create a project
 
-You do not need to prepare CSV files first. The app is explicitly designed so the editor becomes your primary authoring surface.
+![New project](/docs/newproject.png)
 
-## The first successful session
+1. Launch the app and click **New Project** on the Home screen.
+2. Enter a project name such as `MyTrainMotor`.
+3. Set defaults such as **Max Speed** and **Acceleration**.
+4. Confirm and enter the editor.
 
-Use this sequence if you want to confirm that the app works correctly on your machine:
+### Step 2: Manage tracks and import audio
 
-1. Launch the application and stay on the Home screen.
-2. Choose **New Project**.
-3. Enter a project name.
-4. Set a reasonable maximum speed and acceleration.
-5. Enter the editor.
-6. Add or activate a track if needed.
-7. Assign an audio file to that track.
-8. Add a few keyframes in the chart or edit values through the list editor.
-9. Press `Space` to preview.
-10. Save the project as a `.msep` file.
+![Import audio](/docs/importaudio.png)
 
-If you can complete those ten steps, the core workflow is working as intended.
+1. In **Track Layers**, make sure there is an active track.
+2. In **Track Details**, click the file picker icon.
+3. Choose a `.wav` or `.ogg` audio file.
 
-## Understanding `.msep`
+### Step 3: Draw pitch and volume curves
 
-`.msep` is the app's project container. It keeps the project description, track setup, curve data, and bundled audio together so you are not forced to manage a fragile collection of loose files by hand.
+![Draw curves](/docs/trackline.png)
 
-From a user perspective, the practical meaning is simple:
+1. Switch to **Keyframe** mode in the toolbar.
+2. Add keyframes for **Traction Pitch** and **Traction Volume** in the chart. Left click adds a point and right click removes one.
+3. For finer control, switch to **Move** mode to drag keyframes or edit values directly in **List Editor**.
 
-- save the `.msep` file when you want to preserve work
-- reopen the same file later to continue editing
-- move the file to another machine or storage location as one project unit
+### Step 4: Preview in real time
 
-## Recommended first reading
+![Real-time preview](/docs/rt-preview.png)
 
-After this page, continue in this order:
+1. Press `Space` to start playback.
+2. Use `W` to move the state toward traction and `S` to move it toward brake.
+3. Adjust **Current Speed**, or switch to **Select** mode and click empty space in the chart to change preview speed quickly.
 
-1. [Home and Projects](/docs/guide/home)
-2. [Interface Overview](/docs/guide/interface-overview)
-3. [Editor Workspace](/docs/guide/editor)
-4. [First Project](/docs/tutorials/first-project)
+### Step 5: Save the project
+
+- Press `Ctrl+S` to save the project as `.msep`.
+- `.msep` is the app's native project format. It packages project settings, curve data, and audio assets together so the project stays portable and editable.
+
+### Step 6: Export a BVE package
+
+![Export](/docs/output.png)
+
+1. Click **Export** in the toolbar or menu.
+2. Choose **BVE** in the dialog.
+3. Select a sample rate, usually `44100 Hz`.
+4. The app generates a `.zip` package containing the required BVE files such as `vehicle.txt`, `motornoise.txt`, and converted WAV audio.
+
+## 3. Common shortcuts
+
+A small set of shortcuts already covers most of the daily editing loop:
+
+| Shortcut | Action |
+| :--- | :--- |
+| **Space** | Play / pause preview |
+| **W** | Move the state toward traction |
+| **S** | Move the state toward brake |
+| **Ctrl+S** | Save the project |
+| **Ctrl+Z / Ctrl+Y** | Undo / redo |
+| **Delete** | Delete the selected keyframe |

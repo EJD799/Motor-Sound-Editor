@@ -1,11 +1,11 @@
----
+﻿---
 title: 快捷键
 description: 日常编辑常用键盘快捷键与交互约定。
 ---
 
 # 快捷键
 
-Motor Sound Editor提供了一些快捷键，掌握少量高频快捷键后，Motor Sound Editor 的主编辑循环会明显更顺手。
+Motor Sound Editor 提供了一组高频快捷键。掌握它们后，日常编辑会顺手很多。
 
 ## 全局编辑快捷键
 
@@ -17,4 +17,3 @@ Motor Sound Editor提供了一些快捷键，掌握少量高频快捷键后，Mo
 - `Ctrl+Shift+Z`：重做
 - `Ctrl+D`：清除当前选择
 - `Delete`：删除选中关键帧
-

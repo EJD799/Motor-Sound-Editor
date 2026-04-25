@@ -1,4 +1,4 @@
-import { defineConfig } from "vitepress";
+﻿import { defineConfig } from "vitepress";
 
 const englishManualSidebar = [
   { text: "Documentation Home", link: "/docs/" },
@@ -7,8 +7,6 @@ const englishManualSidebar = [
   { text: "Interface Overview", link: "/docs/guide/interface-overview" },
   { text: "Editor Workspace", link: "/docs/guide/editor" },
   { text: "Tracks and Audio", link: "/docs/guide/tracks-and-audio" },
-  { text: "Curve Editing", link: "/docs/guide/curve-editing" },
-  { text: "Transport and Preview", link: "/docs/guide/transport-and-preview" },
   { text: "List Editor", link: "/docs/guide/list-editor" },
   { text: "Project Details and Save", link: "/docs/guide/project-details-and-save" },
   { text: "Export Workflow", link: "/docs/guide/export" },
@@ -18,16 +16,18 @@ const englishManualSidebar = [
 
 const englishTutorialSidebar = [
   { text: "First Project", link: "/docs/tutorials/first-project" },
-  { text: "Assign Audio and Preview", link: "/docs/tutorials/assign-audio-and-preview" },
-  { text: "Refine Curves and Export", link: "/docs/tutorials/refine-curves-and-export" },
+];
+
+const englishDevelopersSidebar = [
+  { text: "For Developers", link: "/docs/developers/for-developers" },
 ];
 
 const chineseManualSidebar = [
   { text: "文档首页", link: "/zh/docs/" },
   { text: "快速开始", link: "/zh/docs/guide/getting-started" },
-  { text: "界面总览", link: "/zh/docs/guide/interface-overview" },
   { text: "首页", link: "/zh/docs/guide/home" },
-  { text: "编辑页", link: "/zh/docs/guide/editor" },
+  { text: "界面总览", link: "/zh/docs/guide/interface-overview" },
+  { text: "编辑器工作区", link: "/zh/docs/guide/editor" },
   { text: "轨道与音频", link: "/zh/docs/guide/tracks-and-audio" },
   { text: "列表编辑器", link: "/zh/docs/guide/list-editor" },
   { text: "项目详情与保存", link: "/zh/docs/guide/project-details-and-save" },
@@ -39,9 +39,11 @@ const chineseManualSidebar = [
 const chineseTutorialSidebar = [
   { text: "创建第一个项目", link: "/zh/docs/tutorials/first-project" },
 ];
+
 const chineseDevelopersSidebar = [
-  { text: "开发者相关", link: "/zh/docs/developers/for-developers.md" },
+  { text: "针对开发者", link: "/zh/docs/developers/for-developers" },
 ];
+
 const sharedThemeConfig = {
   logo: "/64x64.png",
   socialLinks: [
@@ -98,6 +100,10 @@ export default defineConfig({
             {
               text: "Tutorials",
               items: englishTutorialSidebar,
+            },
+            {
+              text: "For Developers",
+              items: englishDevelopersSidebar,
             },
           ],
         },

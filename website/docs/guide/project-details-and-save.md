@@ -1,97 +1,35 @@
----
+﻿---
 title: Project Details and Save
 description: Review project metadata, statistics, save behavior, and history controls.
 ---
 
 # Project Details and Save
 
-Serious editing work depends on more than curves and playback. You also need to understand what the project is called, how it is described, how large it is becoming, and when your changes are safely stored.
+This page explains what you can see in the project details dialog, what `.msep` is for, and how save behavior currently works.
 
-## Project details
+## 1. Project details
 
-The editor includes a project-details view that summarizes key information about the current file. Expect it to surface values such as:
+![Project details](/docs/ProjectDetails.png)
 
-- project name
-- creation or update timestamps
-- track count
-- keyframe count
-- speed and acceleration metadata
+**Project Details** shows the current project name along with a set of project statistics. In the current implementation:
 
-Use this view when you want a quick structural check before saving or exporting.
+- **Editable field**: project name.
+- **Read-only information**: file path, track count, audio-asset count, assigned-audio count, total keyframes, maximum speed, acceleration, brake deceleration, created time, and updated time.
 
-## Why project details matter
+These values are useful when you want to confirm the current state of a project before continuing to edit or preparing an export.
 
-Project details are especially helpful when:
+## 2. The `.msep` project format
 
-- the file has grown into a multi-track project
-- you want to confirm the correct project is open
-- you are checking whether a revision changed the project more than expected
+Motor Sound Editor uses `.msep` as its native project file format.
 
-It is much easier to catch a wrong max-speed value or an unexpectedly large keyframe count here than after export.
+- **Packaged together**: `.msep` stores project metadata, track definitions, curve data, and packaged audio resources in one file.
+- **Portable**: you do not need to manage a separate folder of loose audio files when moving or sharing the project.
+- **Editable source**: `.msep` is the editable source project, not the final delivery package.
 
-## Save vs Save As
+## 3. Save and unsaved changes
 
-The application supports both:
-
-- **Save**
-- **Save As**
-
-### Save
-
-Use Save when the current file path is already correct and you want to update the existing `.msep` file in place.
-
-### Save As
-
-Use Save As when:
-
-- you want a new project revision
-- you want to branch an experiment
-- you need to move the project to a new location
-
-Save As is especially useful before making large structural edits such as replacing many audio assets or reworking an entire curve set.
-
-## What gets saved
-
-Saving writes the packaged project state, including:
-
-- project metadata
-- track definitions
-- curve/keyframe data
-- referenced audio payloads
-
-The current save path also prunes audio that is no longer referenced by any track, so replaced sound files do not keep accumulating inside the saved `.msep` package.
-
-## Dirty state and unsaved changes
-
-The project becomes dirty when edits change the current document. Typical dirtying actions include:
-
-- editing project metadata
-- changing track properties
-- assigning or removing audio
-- editing keyframes
-- changing active project content through list-editor apply actions
-
-If you try to leave the editor or close the app with unsaved changes, the app can prompt you so the work is not lost by accident.
-
-## Undo and redo
-
-Motor Sound Editor keeps editing history so you can move backward and forward through recent work.
-
-Use:
-
-- `Ctrl+Z` for undo
-- `Ctrl+Y` or `Ctrl+Shift+Z` for redo
-
-History is most helpful during curve shaping, track edits, and rapid experimentation.
-
-## Good save habits
-
-- Save after important structural milestones.
-- Use Save As before risky experiments.
-- Check project details before export.
-- Do not rely on memory alone for revision control.
-
-## Related reading
-
-- [Export Workflow](/docs/guide/export)
-- [Shortcuts](/docs/guide/shortcuts)
+- **Unsaved state**: the project becomes dirty when you add tracks, edit keyframes, replace audio, or update the project name.
+- **Save** writes the current document and packaged audio back to the existing `.msep` file.
+- **Save As** writes the current project into a new `.msep` file.
+- **Leave confirmation** appears before returning home or closing the window if the project still has unsaved changes.
+- **Undo / redo** remains available during the current session even after saving, as long as the app stays open.

@@ -1,84 +1,52 @@
----
+﻿---
 title: List Editor
 description: Edit traction and brake keyframes in a table-based view.
 ---
 
 # List Editor
 
-The chart editor is the primary authoring surface, but it is not the only one. Motor Sound Editor also includes a **List View Editor** for table-based keyframe work.
+The chart editor is the main creation surface, but it is not the only one. Motor Sound Editor also provides **List Editor**, a table-based way to work with keyframe data.
 
-## When to use the list editor
+When you need to review, correct, or enter many keyframes precisely, the list editor offers more direct numeric feedback than the chart view.
 
-Use the list editor when:
+![List view](/docs/listview.png)
 
-- you want exact numeric values
-- the chart feels too dense to read quickly
-- you need to compare traction and brake data side by side
-- you want to insert or remove points in a more tabular workflow
+## 1. Core purpose
 
-The list editor is especially useful when the shape is already mostly decided and you are polishing exact values.
+The list editor maps the current track's keyframes into a table so you can manage them more like spreadsheet data.
 
-## Table layout
+- **Precise input**: you can type exact values such as `60.5 km/h` or `0.85`.
+- **Global overview**: you can review a whole track's keyframe distribution in one place and catch jumps or redundant points more easily.
+- **Side-by-side editing**: the current implementation shows both **Traction** and **Brake** data at the same time, with separate Pitch and Volume columns.
 
-The list editor presents two main groups:
+## 2. Layout
 
-- **traction**
-- **brake**
+The table is organized into these main areas:
 
-Each group is split into columns for:
+1. a **Traction** section with speed and value columns
+2. a **Brake** section with speed and value columns
+3. separate **Pitch** and **Volume** columns inside each section
 
-- speed / volume
-- speed / pitch
+## 3. Draft editing model
 
-This lets you compare related data without switching away from the current track.
+The list editor uses a draft-based flow:
 
-## Draft editing model
+- edits stay inside the dialog while you work
+- **Apply** writes the draft back to the project
+- **Cancel** discards the current draft
 
-The list editor works on a draft version of the active track's curve data. That matters because it gives you a controlled commit point:
+## 4. Automatic sorting
 
-- **Apply** writes the edited draft back into the project
-- **Cancel** closes the dialog without keeping the draft changes
+Keyframes are always sorted by speed. If you change the speed of a keyframe, the visible row order may change automatically so the table remains logically ordered.
 
-This is one of the safest ways to make several numeric adjustments before committing them as a group.
+## 5. Right-click context menu
 
-## Editing cells
+You can open a context menu by right clicking either in the chart area or inside the list editor.
 
-Cells use numeric inputs. You can change:
+![Right-click context menu](/docs/listcontexmenu.png)
 
-- speed values
-- pitch values
-- volume values
+Common list-editor actions currently include:
 
-As values change, the app keeps the relevant keyframe lists sorted by speed so the resulting data remains coherent.
-
-## Adding a keyframe from the list editor
-
-The list editor includes an **Add keyframe** action. Use it when you need a new point in a specific traction/brake and pitch/volume context without returning to the chart first.
-
-The add-keyframe panel asks for:
-
-- target kind
-- speed
-- value
-
-After insertion, the draft is re-sorted by speed.
-
-## Deleting a keyframe from the list editor
-
-The list editor can remove the current row's keyframe through its contextual commands. This is helpful when a point is easier to identify by row than by chart position.
-
-## Sync actions
-
-The list editor includes sync-oriented context actions between traction and brake data. Use these carefully. They are powerful when you want one side to inherit the structure of the other, but they can also overwrite intentional differences if used too early.
-
-## Best practices
-
-- Use the chart to establish shape.
-- Use the list editor to polish numbers.
-- Apply only after reviewing both traction and brake columns.
-- Cancel if you opened the dialog only to inspect current values.
-
-## Related reading
-
-- [Curve Editing](/docs/guide/curve-editing)
-- [Project Details and Save](/docs/guide/project-details-and-save)
+- **Sync traction to brake / Sync brake to traction** to copy one side's data to the other
+- **Add keyframe** to insert a new point and let it join the sorted list automatically
+- **Delete current keyframe** to remove the selected point

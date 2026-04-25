@@ -1,4 +1,4 @@
----
+﻿---
 title: FAQ
 description: Common questions about file formats, limits, and current behavior.
 ---
@@ -7,39 +7,39 @@ description: Common questions about file formats, limits, and current behavior.
 
 ## What is `.msep`?
 
-`.msep` is the editable project container used by Motor Sound Editor. It stores project metadata, track definitions, curve data, and referenced audio together so the project can be reopened and moved as one unit.
+`.msep` is the editable project container used by Motor Sound Editor. It packages project metadata, track definitions, curve data, and referenced audio together so the whole project can be reopened or moved as one unit.
 
 ## Which audio formats can I assign to tracks?
 
-The current build supports assigning:
+The current version supports:
 
 - `wav`
 - `ogg`
 
-## Why do I see traction, coasting, and brake if only traction and brake curve sets are editable?
+## Why does the interface show traction, coasting, and brake if only traction and brake curves are editable?
 
-Because the preview system exposes three simulator states, while the current authoring model stores dedicated traction and brake curve sets. In the present build, coasting remains part of the traction-side authoring path.
+The preview system exposes three simulator states, but the current authoring model stores only dedicated traction and brake curve sets. In the current version, coasting still previews through the traction-side curves.
 
 ## Can I preview multiple tracks at the same time?
 
-Yes. The preview engine is designed for layered playback as long as the tracks are audible and have valid assigned audio.
+Yes. As long as a track is audible and has valid audio assigned, the preview engine can play multiple layers together.
 
-## Are hidden tracks audible?
+## Are hidden tracks still audible?
 
-No. In the current implementation, preview uses tracks that are enabled, not muted, and not hidden.
+No. In the current implementation, preview uses only tracks that are enabled, unmuted, and not hidden.
 
-## Does replacing track audio keep old files in the saved project forever?
+## If I replace a track's audio, does the old file stay in the project forever?
 
-No. Save and Save As prune unreferenced audio from the resulting `.msep` package so replaced audio does not continue to accumulate inside the saved file.
+No. Save and Save As clean up unreferenced audio, so replaced files do not keep accumulating inside the `.msep` project.
 
 ## Is there a finished settings page?
 
-No. There is a settings store in the codebase, but there is no finished settings screen in the current user-facing build.
+No. The codebase already has settings storage, but the current user-facing build does not include a finished settings screen.
 
 ## Which export targets work right now?
 
-The export dialog currently exposes BVE as the active working target. Other listed targets are visible but disabled.
+In the current export dialog, only BVE is available. Other targets are visible but cannot be selected.
 
-## Should I rely only on export output and skip saving the `.msep` file?
+## Can I rely on export output only and skip saving the `.msep` file?
 
-No. The `.msep` file is your editable source project. Exported packages are deliverables, not replacements for the editable master file.
+That is not recommended. `.msep` is the editable source project, while the export package is the delivery artifact. One does not replace the other.
